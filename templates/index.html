@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Generator</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #ec4899;
+            --background-color: #f0f9ff;
+            --container-bg: #ffffff;
+            --text-color: #1e293b;
+        }
+        
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--background-color);
+            color: var(--text-color);
+        }
+        .container {
+            background: var(--container-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .upload-section {
+            text-align: center;
+            padding: 30px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        .subject-reference {
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+            border-radius: 12px;
+            color: white;
+            text-align: left;
+        }
+        .prompt-section {
+            margin: 20px 0;
+            text-align: left;
+            padding: 25px;
+            background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+            border-radius: 12px;
+        }
+        .prompt-tips {
+            margin: 15px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.95em;
+            border-left: 4px solid var(--accent-color);
+        }
+        .prompt-template {
+            margin: 5px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .prompt-template:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        #promptInput {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+        #promptInput:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        #generateButton {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #generateButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        #generateButton:disabled {
+            background: #cbd5e1;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+            border-radius: 8px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        h1, h3 {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Video Generator</h1>
+        <p>Generate creative videos with optional character customization!</p>
+        
+        <div class="upload-section">
+            <div class="subject-reference">
+                <h3>Optional: Add Your Character</h3>
+                <p>Upload a photo to include yourself or a specific person in the generated video. The AI will use this as a reference for the main character in the scene.</p>
+                <input type="file" id="uploadInput" accept="image/*">
+                <button onclick="document.getElementById('uploadInput').click()">Choose Character Photo</button>
+                <div class="preview-section">
+                    <img id="imagePreview" alt="Preview">
+                </div>
+            </div>
+            
+            <div class="prompt-section">
+                <h3>Describe Your Scene</h3>
+                <div class="prompt-tips">
+                    <strong>Tips for amazing videos:</strong>
+                    <ul>
+                        <li>Describe the environment in detail (location, time, weather)</li>
+                        <li>Specify actions and movements</li>
+                        <li>Include lighting and atmosphere</li>
+                        <li>Mention camera angles or movements</li>
+                        <li>If you uploaded a character photo, describe what they're doing</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4>Scene Templates:</h4>
+                    <button class="prompt-template" onclick="useTemplate(this)">A charismatic entrepreneur presents to investors in a sleek, modern office with floor-to-ceiling windows overlooking a futuristic city skyline at golden hour. Holographic charts and graphs float in the air.</button>
+                    <button class="prompt-template" onclick="useTemplate(this)">A confident speaker delivers an inspiring TED talk on a circular stage, surrounded by an engaged audience in a grand auditorium. Dynamic lighting creates a dramatic atmosphere.</button>
+                    <button class="prompt-template" onclick="useTemplate(this)">A innovative leader guides their team through a breakthrough moment in a high-tech laboratory. Glowing screens and 3D projections illuminate their excited expressions.</button>
+                </div>
+                
+                <textarea id="promptInput" rows="4" 
+                    placeholder="Example: A visionary entrepreneur walks confidently through a modern office space in Dubai. Floor-to-ceiling windows reveal a stunning skyline at sunset. They stop at a sleek presentation area where holographic displays show impressive business metrics. Camera moves smoothly, following their journey through the space."></textarea>
+            </div>
+            
+            <button id="generateButton" style="display: none;">Generate Video</button>
+            <div class="loading" id="loadingIndicator">
+                Generating your video... This may take a few minutes. Creating high-quality HD video with your specifications.
+            </div>
+            <video id="videoResult" controls>
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+    <script>
+        const uploadInput = document.getElementById('uploadInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const generateButton = document.getElementById('generateButton');
+        const promptInput = document.getElementById('promptInput');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const videoResult = document.getElementById('videoResult');
+
+        function useTemplate(button) {
+            promptInput.value = button.textContent;
+            generateButton.style.display = 'block';
+        }
+
+        uploadInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Show generate button when prompt is entered
+        promptInput.addEventListener('input', function() {
+            if (promptInput.value.trim()) {
+                generateButton.style.display = 'block';
+            } else {
+                generateButton.style.display = 'none';
+            }
+        });
+
+        generateButton.addEventListener('click', async function() {
+            if (!promptInput.value.trim()) {
+                alert('Please enter a scene description to get better results!');
+                return;
+            }
+            
+            try {
+                generateButton.disabled = true;
+                loadingIndicator.style.display = 'block';
+                videoResult.style.display = 'none';
+
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: promptInput.value,
+                        image: imagePreview.style.display !== 'none' ? imagePreview.src : null
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                videoResult.src = data.video_url;
+                videoResult.style.display = 'block';
+            } catch (error) {
+                alert('Error generating video: ' + error.message);
+            } finally {
+                generateButton.disabled = false;
+                loadingIndicator.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
