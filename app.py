@@ -154,19 +154,28 @@ def generate_final_prompt():
 @app.route('/generate', methods=['POST'])
 def generate_video():
     try:
+        # Check if Replicate API token is set
+        if not os.getenv('REPLICATE_API_TOKEN'):
+            print("Error: REPLICATE_API_TOKEN is not set")
+            return jsonify({'error': 'Replicate API token is not configured'}), 500
+
         prompt = request.json.get('prompt')
         if not prompt:
             return jsonify({'error': 'Prompt is required'}), 400
 
+        print(f"Starting video generation with prompt: {prompt}")
+
         # Handle the subject reference image if provided
         subject_image = None
         if 'image' in request.json and request.json['image']:
+            print("Processing subject reference image...")
             image_data = request.json['image'].split(',')[1]
             with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
                 temp_file.write(base64.b64decode(image_data))
                 temp_file.flush()
                 with open(temp_file.name, 'rb') as image_file:
                     subject_image = image_file
+                    print("Calling Replicate API with subject image...")
                     output = replicate.run(
                         "minimax/video-01",
                         input={
@@ -183,6 +192,7 @@ def generate_video():
                     )
                 os.unlink(temp_file.name)
         else:
+            print("Calling Replicate API without subject image...")
             output = replicate.run(
                 "minimax/video-01",
                 input={
@@ -197,8 +207,10 @@ def generate_video():
                 }
             )
 
+        print(f"Video generation completed. Output: {output}")
         return jsonify({'video_url': output})
     except Exception as e:
+        print(f"Error during video generation: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
