@@ -12,10 +12,8 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # For session management
 
-# Initialize OpenAI client
-openai_client = OpenAI(
-    api_key=os.getenv('OPENAI_API_KEY')
-)
+# Initialize OpenAI client with minimal configuration
+openai_client = OpenAI()
 
 # Verify API key is set
 if not os.getenv('OPENAI_API_KEY'):
