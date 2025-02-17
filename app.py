@@ -50,6 +50,13 @@ def get_vision_advisor_response(messages):
         # Get the next question index based on number of user messages
         question_index = len([m for m in messages if m["role"] == "user"])
         
+        # If we've asked all questions, generate the final prompt
+        if question_index >= len(VISION_QUESTIONS):
+            return {
+                "message": "Thank you for sharing your vision! Let me create something special for you...",
+                "should_generate_prompt": True
+            }
+        
         # Ask the next question
         response = openai_client.chat.completions.create(
             model="gpt-4-turbo-preview",
