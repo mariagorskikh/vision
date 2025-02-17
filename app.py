@@ -14,8 +14,7 @@ app.secret_key = os.urandom(24)  # For session management
 
 # Initialize OpenAI client
 openai_client = OpenAI(
-    api_key=os.getenv('OPENAI_API_KEY'),
-    base_url="https://api.openai.com/v1"
+    api_key=os.getenv('OPENAI_API_KEY')
 )
 
 VISION_QUESTIONS = [
