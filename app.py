@@ -12,10 +12,11 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # For session management
 
-# Initialize OpenAI client only if API key is available
-openai_client = None
-if os.getenv('OPENAI_API_KEY'):
-    openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# Initialize OpenAI client
+openai_client = OpenAI(
+    api_key=os.getenv('OPENAI_API_KEY'),
+    base_url="https://api.openai.com/v1"
+)
 
 VISION_QUESTIONS = [
     "If you could achieve anything in life, regardless of limitations, what would be your ultimate dream?",
